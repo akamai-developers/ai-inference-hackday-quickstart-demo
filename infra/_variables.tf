@@ -1,0 +1,35 @@
+variable "project_name" {
+  type        = string
+  description = "Prefix used for naming all resources."
+  default     = "ai-hackday-demo"
+}
+
+variable "linode_token" {
+  type        = string
+  description = "Linode API token used by Terraform to provision infrastructure."
+  sensitive = true
+}
+
+variable "root_pass" {
+  type        = string
+  description = "Temporary root password for the GPU instance."
+  sensitive = true
+}
+
+variable "region" {
+  type        = string
+  description = "Linode region where the GPU instance will be created."
+  default = "id-cgk"
+}
+
+variable "instance_type" {
+  type        = string
+  description = "Linode GPU instance type/plan slug."
+  default = "g3-gpu-rtxpro6000"
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  description = "Path to the local SSH public key used for VM access."
+  default = "~/.ssh/id_ed25519.pub"
+}

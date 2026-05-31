@@ -1,0 +1,37 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - curl
+  - wget
+  - nvtop
+  - python3-pip
+  - python3-venv
+  - build-essential
+  - dkms
+  - docker.io
+  - docker-compose
+
+runcmd:
+  - echo "Installing kernel headers..." | tee -a /root/cloud-init-vllm.log
+  - apt-get install -y linux-headers-$(uname -r)
+
+  - echo "Installing NVIDIA open driver..." | tee -a /root/cloud-init-vllm.log
+  - apt-get install -y nvidia-driver-595-open
+
+  - echo "Installing latest CUDA toolkit..." | tee -a /root/cloud-init-vllm.log
+  - wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring.deb
+  - dpkg -i /tmp/cuda-keyring.deb
+  - apt-get update
+  - apt-get install -y cuda-toolkit-13-2
+
+  - echo 'export CUDA_HOME=/usr/local/cuda-13.2' >> /root/.bashrc
+  - echo 'export PATH=$CUDA_HOME/bin:$PATH' >> /root/.bashrc
+  - echo 'export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH' >> /root/.bashrc
+
+  - echo "Setup complete. Rebooting for NVIDIA driver." | tee -a /root/cloud-init-vllm.log
+
+power_state:
+  mode: reboot

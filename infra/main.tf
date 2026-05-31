@@ -1,0 +1,62 @@
+terraform {
+  required_providers {
+    linode = {
+      source  = "linode/linode"
+    }
+  }
+}
+
+provider "linode" {
+  token = var.linode_token
+}
+
+resource "linode_sshkey" "default" {
+  label   = "${var.project_name}-key"
+  ssh_key = chomp(file(var.ssh_public_key_path))
+}
+
+resource "linode_instance" "gpu" {
+  label           = "${var.project_name}-gpu"
+  region          = var.region
+  type            = var.instance_type
+  image           = "linode/ubuntu22.04"
+  root_pass       = var.root_pass
+  authorized_keys = [linode_sshkey.default.ssh_key]
+  firewall_id = linode_firewall.fw.id
+
+  metadata {
+    user_data = base64encode(templatefile("${path.module}/cloud-init.yaml",))
+  }
+
+  tags = ["hackday", "gpu"]
+}
+
+resource "linode_firewall" "fw" {
+  label   = "${var.project_name}-fw"
+  inbound_policy  = "DROP"
+  outbound_policy = "ACCEPT"
+
+  inbound {
+    label    = "ssh"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ports    = "22"
+    ipv4     = ["0.0.0.0/0"]
+  }
+
+  inbound {
+    label    = "allow-vllm"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ports    = "8000"
+    ipv4     = ["0.0.0.0/0"]
+  }
+
+  inbound {
+    label    = "allow-streamlit"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ports    = "8501"
+    ipv4     = ["0.0.0.0/0"]
+  }
+}
