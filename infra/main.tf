@@ -25,7 +25,7 @@ resource "linode_instance" "gpu" {
   firewall_id = linode_firewall.fw.id
 
   metadata {
-    user_data = base64encode(templatefile("${path.module}/cloud-init.yaml",))
+    user_data = base64encode(file("${path.module}/cloud-init.yaml"))
   }
 
   tags = ["hackday", "gpu"]
