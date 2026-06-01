@@ -7,10 +7,11 @@ class IncomingHandler(IncomingHandler):
 
     def handle_request(self, request: Request) -> Response:
 
-        # Parse request body
         try:
             body = json.loads(request.body)
             user_prompt = body.get("prompt", "")
+            max_tokens = body.get("max_tokens", 180)
+
         except Exception as e:
             return Response(
                 400,
@@ -21,38 +22,28 @@ class IncomingHandler(IncomingHandler):
                 }).encode()
             )
 
-        # Determine location source
-        demo_city = request.headers.get("x-demo-city")
-        demo_country = request.headers.get("x-demo-country")
-
+        # Use Akamai EdgeScape headers only.
+        # If they are unavailable, fall back to Nairobi for local testing/demo safety.
         akamai_city = request.headers.get("x-akamai-edgescape-city")
         akamai_country = request.headers.get("x-akamai-edgescape-country")
 
-        if demo_city and demo_country:
-            detected_city = demo_city
-            detected_country = demo_country
-            location_source = "Simulated Destination"
-
-        elif akamai_city and akamai_country:
+        if akamai_city and akamai_country:
             detected_city = akamai_city
             detected_country = akamai_country
             location_source = "Akamai Edge"
-
         else:
-            detected_city = "Tokyo (Shibuya)"
-            detected_country = "Japan"
-            location_source = "Fallback Demo Location"
+            detected_city = "Nairobi (Westlands)"
+            detected_country = "Kenya"
+            location_source = "Default Demo Location"
 
-        # Build system prompt
         system_instruction = (
-            f"You are a local cultural travel companion. "
+            f"You are a concise local travel guide. "
             f"The user is currently located in {detected_city}, {detected_country}. "
-            f"Answer their prompt using local context, nearby recommendations, "
-            f"and useful native phrases with phonetic pronunciation."
+            f"Answer in 3-5 short bullets. Include one local food recommendation, "
+            f"one cultural tip, and one useful local phrase with phonetic pronunciation."
         )
 
-        # Build vLLM request
-        vllm_url = "http://172.235.244.111:8000/v1/chat/completions"
+        vllm_url = "http://YOUR_LINODE_GPU_IP:8000/v1/chat/completions"
 
         vllm_payload = {
             "model": "meta-llama/Llama-3.2-1B-Instruct",
@@ -66,10 +57,10 @@ class IncomingHandler(IncomingHandler):
                     "content": user_prompt
                 }
             ],
-            "temperature": 0.6
+            "temperature": 0.6,
+            "max_tokens": max_tokens
         }
 
-        # Call vLLM
         try:
             vllm_response = http.send(
                 Request(
@@ -92,7 +83,6 @@ class IncomingHandler(IncomingHandler):
                 }).encode()
             )
 
-        # Validate vLLM response
         if "choices" not in vllm_data:
             return Response(
                 502,
@@ -105,12 +95,17 @@ class IncomingHandler(IncomingHandler):
 
         ai_text = vllm_data["choices"][0]["message"]["content"]
 
-        # Return to Streamlit
         output_payload = {
             "locationContext": f"{detected_city}, {detected_country}",
             "locationSource": location_source,
             "injectedSystemPrompt": system_instruction,
-            "aiResponse": ai_text
+            "aiResponse": ai_text,
+            "messagesSentToVllm": vllm_payload["messages"],
+            "model": "Llama 3.2 1B",
+            "inferenceEngine": "vLLM",
+            "backend": "Linode GPU VM",
+            "promptTokens": vllm_data.get("usage", {}).get("prompt_tokens", "N/A"),
+            "completionTokens": vllm_data.get("usage", {}).get("completion_tokens", "N/A")
         }
 
         return Response(

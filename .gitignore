@@ -231,3 +231,7 @@ terraform.tfvars
 
 # other files to ignore
 *.log
+
+__pycache__
+*.wasm
+.spin

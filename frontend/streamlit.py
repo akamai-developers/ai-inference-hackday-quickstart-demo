@@ -2,171 +2,122 @@ import time
 import requests
 import streamlit as st
 
-EDGE_FUNCTION_URL = "http://127.0.0.1:3000"
+EDGE_FUNCTION_URL = "http://YOUR_LINODE_GPU_IP:3000" # Replace with deployed Spin URL later
 
-st.set_page_config(
-    page_title="OmniRoute AI: Your Local Guide Anywhere",
-    page_icon="🌐",
-    layout="wide"
-)
-
-# ------------------------------------------------------------------
-# Header
-# ------------------------------------------------------------------
+st.set_page_config(page_title="OmniRoute AI", page_icon="🌐", layout="wide")
 
 st.title("🌐 OmniRoute AI")
-st.caption(
-    "Location-powered travel assistance using Akamai Edge and GPU-accelerated AI."
+
+st.markdown(
+    "Your AI-powered travel companion for exploring local culture, food, customs, and language. "
+    "Ask questions about any destination and receive recommendations tailored to where you're visiting."
 )
 
-st.info(
-    "🔄 Request Flow: Streamlit → Akamai Edge Function → Linode GPU (vLLM) → Local Travel Recommendations"
-)
-
-# ------------------------------------------------------------------
-# Sidebar
-# ------------------------------------------------------------------
+st.caption("Powered by Akamai Edge, Spin, vLLM, and Linode GPU inference.")
 
 with st.sidebar:
-    st.header("🧭 Trip Setup")
-    st.write("Choose how location will be determined.")
+    st.header("🌍 Location Detection")
 
-    location_mode = st.radio(
-        "Location Mode",
-        [
-            "Use Real Edge Location",
-            "Simulate a Destination"
-        ]
+    st.success(
+        "OmniRoute uses Akamai Edge geolocation when available. "
+        "If no edge location is detected, the demo defaults to Nairobi."
     )
 
-    mock_location = None
+    max_tokens = st.slider(
+        "Response Length",
+        min_value=80,
+        max_value=350,
+        value=180,
+        step=20
+    )
 
-    if location_mode == "Simulate a Destination":
-        mock_location = st.selectbox(
-            "Destination",
-            [
-                "Tokyo (Shibuya District), Japan",
-                "Paris (Le Marais), France",
-                "Nairobi (Westlands), Kenya"
-            ]
-        )
+main_col, metrics_col = st.columns([2.4, 1])
 
-# ------------------------------------------------------------------
-# Prompt Section
-# ------------------------------------------------------------------
+with main_col:
+    st.markdown("### ✈️ Ask me anything!")
 
-st.markdown("### ✈️ Ask Your Local Travel Guide")
+    user_query = st.text_area(
+        "What would you like to know?",
+        value="What is a popular local breakfast here, and how do I politely ask for the check?",
+        height=120
+    )
 
-user_query = st.text_area(
-    "What would you like to know?",
-    value="What is a popular local breakfast here, and how do I politely ask for the check?",
-    height=120
-)
+    run_query = st.button(
+        "Get Local Tips",
+        type="primary",
+        use_container_width=True
+    )
 
-# ------------------------------------------------------------------
-# Query Button
-# ------------------------------------------------------------------
+with metrics_col:
+    st.markdown("### ⚡ Live Summary")
+    metrics_placeholder = st.empty()
 
-if st.button("Get Local Tips", type="primary", use_container_width=True):
-
+if run_query:
     start_time = time.time()
 
-    custom_headers = {}
-
-    if location_mode == "Simulate a Destination":
-        city, country = [x.strip() for x in mock_location.split(",")]
-
-        custom_headers = {
-            "x-demo-city": city,
-            "x-demo-country": country
-        }
-
     try:
-
-        with st.spinner("Building location-aware prompt..."):
-
+        with st.spinner("Sending request through Akamai Edge and vLLM..."):
             response = requests.post(
                 EDGE_FUNCTION_URL,
-                json={"prompt": user_query},
-                headers=custom_headers,
+                json={
+                    "prompt": user_query,
+                    "max_tokens": max_tokens
+                },
                 timeout=60
             )
 
-        elapsed_ms = (time.time() - start_time) * 1000
+        total_ms = (time.time() - start_time) * 1000
 
         if response.status_code == 200:
-
             data = response.json()
 
-            # ------------------------------------------------------
-            # Metrics
-            # ------------------------------------------------------
-
-            st.markdown("### ⚡ Request Summary")
-
-            col1, col2, col3 = st.columns(3)
-
-            col1.metric(
-                "Response Time",
-                f"{elapsed_ms:.1f} ms"
-            )
-
-            col2.metric(
-                "Destination",
-                data["locationContext"]
-            )
-
-            col3.metric(
-                "Location Source",
-                data["locationSource"]
-            )
+            with metrics_placeholder.container():
+                st.metric("Latency", f"{total_ms:.1f} ms")
+                st.metric("Edge Location", data.get("locationContext", "Unknown"))
+                st.metric("Model", data.get("model", "Unknown"))
 
             st.success(
-                "Location information was added before the request reached the model."
+                f"📍 Location added at the edge: {data.get('locationContext', 'Unknown')}"
             )
 
-            # ------------------------------------------------------
-            # Architecture View
-            # ------------------------------------------------------
+            st.markdown("### Location Added by Spin")
+            with st.container(border=True):
+                st.markdown(f"**Detected Location:** {data.get('locationContext', 'Unknown')}")
+                st.markdown(f"**Source:** {data.get('locationSource', 'Unknown')}")
 
-            with st.expander("🧩 Behind the Scenes"):
-                st.markdown(
-                    """
-                    **1. Streamlit** collects your question.
+            st.markdown("### Prompt Sent to vLLM")
 
-                    **2. Akamai Edge Function** determines or receives location information.
-
-                    **3. A location-aware system prompt is created.**
-
-                    **4. The prompt is sent to vLLM running on a Linode GPU.**
-
-                    **5. The AI generates a localized response.**
-                    """
-                )
-
-            # ------------------------------------------------------
-            # Prompt Inspection
-            # ------------------------------------------------------
-
-            with st.expander("🔍 View the Prompt Sent to vLLM"):
-                st.code(
-                    data["injectedSystemPrompt"],
-                    language="text"
-                )
-
-            # ------------------------------------------------------
-            # AI Response
-            # ------------------------------------------------------
-
-            st.markdown("### 📍 Recommendations for This Destination")
+            messages = data.get("messagesSentToVllm", [])
 
             with st.container(border=True):
-                st.write(data["aiResponse"])
+                if messages:
+                    for message in messages:
+                        role = message.get("role", "").upper()
+                        content = message.get("content", "")
+
+                        if role == "SYSTEM":
+                            st.markdown("#### 🌐 System Instructions")
+                        elif role == "USER":
+                            st.markdown("#### ✈️ User Message")
+                        else:
+                            st.markdown(f"#### {role}")
+
+                        st.write(content)
+                        st.divider()
+                else:
+                    st.markdown("#### 🌐 System Instructions")
+                    st.write(data.get("injectedSystemPrompt", ""))
+
+                    st.markdown("#### ✈️ User Message")
+                    st.write(user_query)
+
+            st.markdown("### vLLM Response")
+            with st.container(border=True):
+                st.write(data.get("aiResponse", ""))
 
         else:
-            st.error(
-                f"Could not reach OmniRoute service. HTTP {response.status_code}"
-            )
+            st.error(f"Could not reach OmniRoute service. HTTP {response.status_code}")
+            st.caption(response.text)
 
     except requests.exceptions.RequestException as e:
         st.error("Unable to connect to the OmniRoute edge service.")

@@ -13,7 +13,7 @@ component = "edge"
 [component.edge]
 source = "app.wasm"
 allowed_outbound_hosts = [
-  "http://172.235.244.111:8000"
+  "http://YOUR_LINODE_GPU_IP:8000"
 ]
 
 [component.edge.build]
