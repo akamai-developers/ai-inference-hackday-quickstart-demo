@@ -6,6 +6,9 @@ description = ""
 name = "edge"
 version = "0.1.0"
 
+[variables]
+LINODE_GPU_IP = { required = true }
+
 [[trigger.http]]
 route = "/..."
 component = "edge"
@@ -13,7 +16,7 @@ component = "edge"
 [component.edge]
 source = "app.wasm"
 allowed_outbound_hosts = [
-  "http://YOUR_LINODE_GPU_IP:8000"
+  "http://LINODE_GPU_IP:8000",
 ]
 
 [component.edge.build]

@@ -43,7 +43,7 @@ class IncomingHandler(IncomingHandler):
             f"one cultural tip, and one useful local phrase with phonetic pronunciation."
         )
 
-        vllm_url = "http://YOUR_LINODE_GPU_IP:8000/v1/chat/completions"
+        vllm_url = "http://LINODE_GPU_IP:8000/v1/chat/completions"
 
         vllm_payload = {
             "model": "meta-llama/Llama-3.2-1B-Instruct",
