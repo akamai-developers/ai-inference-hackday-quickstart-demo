@@ -1,0 +1,21 @@
+spin_manifest_version = 2
+
+[application]
+authors = ["Sheilah <kirui.sheilah@gmail.com>"]
+description = ""
+name = "edge"
+version = "0.1.0"
+
+[[trigger.http]]
+route = "/..."
+component = "edge"
+
+[component.edge]
+source = "app.wasm"
+allowed_outbound_hosts = [
+  "http://172.235.244.111:8000"
+]
+
+[component.edge.build]
+command = "componentize-py -w spin-http componentize app -o app.wasm"
+watch = ["*.py", "requirements.txt"]
