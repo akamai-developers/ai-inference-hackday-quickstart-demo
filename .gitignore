@@ -235,3 +235,6 @@ terraform.tfvars
 __pycache__
 *.wasm
 .spin
+*.toml
+edge/
+_streamlit.py
