@@ -1,58 +1,281 @@
-# 🌐 OmniRoute AI: The Location-Aware Travel Assistant
+# Ask Akamai AI Cloud
 
-OmniRoute AI is a smart translation and travel chatbot that automatically figures out where you are standing in the world and gives you localized answers—**without ever asking for your phone's GPS location or browser tracking permissions.**
+A hands-on workshop project that demonstrates how **inference decisions** can make AI applications faster, cheaper, more reliable, and more useful.
 
-### How It Works
-1. **You type a generic question** into the chat box (e.g., *"What should I eat for breakfast here?"*).
-2. **Akamai captures your web request** at the nearest network tower and instantly notes your city and country based on your internet connection.
-3. **A lightweight Python script at the edge** injects that location data directly into your prompt behind the scenes, transforming your generic question into a hyper-targeted request (e.g., *"The user is in Tokyo. What should they eat for breakfast?"*).
-4. **Our private Linode GPU server** runs the AI model (Llama 3.2 via vLLM) and streams a personalized, native response back to your screen in milliseconds.
+Rather than focusing on model training or infrastructure deployment, this project explores the engineering layer that sits between users and large language models (LLMs). Participants learn how to improve AI applications through techniques such as context optimization, model routing, reliability patterns, and observability.
+
+The application is built as a simple documentation assistant powered by public Akamai AI Cloud documentation and a hosted inference endpoint.
 
 ---
 
-## 🏗️ Architecture Blueprint
+## Workshop Goal
 
-The application demonstrates a distributed **Edge-to-Core AI Pipeline** written entirely in **100% Pure Python**:
+The purpose of this project is to teach participants how to think beyond simply calling an LLM API.
 
-1. **Frontend Layer (Streamlit):** A minimalist Python dashboard that allows users to prompt the assistant and simulate traveling across global networks in real-time.
-2. **Edge Orchestration Layer (Akamai Functions):** A lightweight Python script compiled to WebAssembly (WASM) via the Spin framework. It extracts geographic routing telemetry (`X-Akamai-Edgescape` headers) at the network edge and dynamically constructs an optimized AI system instruction package.
-3. **Core Inference Layer (Linode GPU Cloud):** An optimized **vLLM engine** serving `meta-llama/Llama-3.2-1B-Instruct` parameters inside dedicated VRAM on high-performance compute instances, offering a secure, private, OpenAI-compatible endpoint.
+By the end of the workshop, participants should understand:
+
+* When larger models are worth the latency and cost
+* How model routing improves efficiency
+* Why context optimization matters
+* How retries and fallback models improve reliability
+* What metrics should be collected to make informed inference decisions
+* How these techniques are used in real AI products
+
+The central message of the workshop is:
+
+> Don't just call an LLM. Engineer the inference path.
 
 ---
 
-## 📂 Project Repository Structure
+## Application Overview
+
+Ask Akamai AI Cloud is a lightweight question-answering assistant that answers questions about Akamai AI Cloud using publicly available documentation.
+
+Example questions:
+
+* What is Akamai AI Cloud?
+* What are GPU Compute Instances?
+* What is the difference between LKE and a virtual machine?
+* How should I deploy a low-latency inference workload on Akamai?
+
+The application evolves throughout the workshop, with each module introducing a new inference engineering concept.
+
+---
+
+## Workshop Modules
+
+### Module 1: Baseline
+
+A simple question-answering application.
 
 ```text
-├── edge/
-│   ├── app.py          # Akamai Functions Serverless script (Python Wasm)
-│   └── spin.toml       # Spin configuration manifest for deployment
-├── frontend/
-│   └── streamlit.py     # Streamlit Interactive User Dashboard (Python)
-├── infra/
-│   ├── main.tf          
-│   └── cloud-init.yaml  # Provision CUDA drivers for GPU
-├── requirements.txt
-└── README.md           # Project Documentation
+Question
+   ↓
+LLM
+   ↓
+Answer
 ```
 
-## 🚀 Quickstart Deployment
+Concepts:
 
-### 1. Core Layer: Launch vLLM on Linode GPU
-SSH into your provisioned Linode GPU compute instance and initialize your model serving engine.
+* Basic inference
+* Hosted model endpoint
+
+---
+
+### Module 2: Context Optimization
+
+Introduces retrieval and grounding using Akamai documentation.
+
+```text
+Question
+   ↓
+Retrieve Relevant Docs
+   ↓
+LLM
+   ↓
+Answer
+```
+
+Concepts:
+
+* Retrieval-Augmented Generation (RAG)
+* Reducing unnecessary context
+* Grounded responses
+
+---
+
+### Module 3: Latency vs Quality
+
+Compares responses from a smaller model and a larger model.
+
+Concepts:
+
+* Response quality
+* Latency tradeoffs
+* Cost tradeoffs
+
+---
+
+### Module 4: Model Routing
+
+Routes requests to different models based on complexity.
+
+```text
+Question
+   ↓
+Router
+   ↓
+ ┌───────────┬───────────┐
+ │           │
+Small      Large
+Model      Model
+```
+
+Concepts:
+
+* Dynamic model selection
+* Cost optimization
+* Latency optimization
+
+---
+
+### Module 5: Reliability
+
+Introduces retries and fallback models.
+
+```text
+Question
+   ↓
+Primary Model
+   ↓
+Failure?
+   ↓
+Retry
+   ↓
+Fallback Model
+```
+
+Concepts:
+
+* Resilience
+* Graceful degradation
+* Production reliability
+
+---
+
+### Module 6: Observability
+
+Displays metrics and inference traces.
+
+Concepts:
+
+* Latency tracking
+* Token usage
+* Routing decisions
+* Fallback events
+* Inference transparency
+
+---
+
+## Architecture
+
+```text
+User
+ ↓
+Ask Akamai AI Cloud
+ ↓
+Retriever
+ ↓
+Router
+ ↓
+Reliability Layer
+ ↓
+Hosted Inference Endpoint
+ ↓
+Model
+```
+
+The application demonstrates how modern AI systems often derive more value from inference architecture than from model changes alone.
+
+---
+
+## Repository Structure
+
+```text
+ask-akamai-ai-cloud/
+│
+├── app.py
+├── config.py
+├── requirements.txt
+│
+├── data/
+│   └── docs.jsonl
+│
+├── src/
+│   ├── inference_client.py
+│   ├── retriever.py
+│   ├── router.py
+│   ├── reliability.py
+│   └── metrics.py
+│
+├── modules/
+│   ├── baseline.py
+│   ├── context_optimization.py
+│   ├── latency_quality.py
+│   ├── model_routing.py
+│   ├── reliability_demo.py
+│   └── observability.py
+│
+└── README.md
+```
+
+---
+
+## Data Sources
+
+This project uses publicly available Akamai documentation, including:
+
+* Akamai AI Cloud
+* GPU Compute Instances
+* NVIDIA RTX PRO 6000 Blackwell GPU documentation
+* Linode Kubernetes Engine (LKE)
+* Related Akamai Cloud resources
+
+Documentation is ingested into a lightweight retrieval system to support context optimization demonstrations.
+
+---
+
+## Running the Application
+
+Set environment variables:
 
 ```bash
-# Setup a clean virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
+export AKAMAI_INFERENCE_URL="http://YOUR_ENDPOINT:8000/v1/chat/completions"
+export SMALL_MODEL="your-small-model"
+export LARGE_MODEL="your-large-model"
+```
 
-# Install vLLM
-pip install vllm
+Install dependencies:
 
-# Authorize Hugging Face access for gated model weights
-export HF_TOKEN="your_huggingface_token_here"
+```bash
+pip install -r requirements.txt
+```
 
-# Start the OpenAI-compatible vLLM server environment
-python3 -m vllm.entrypoints.openai.api_server \
-    --model meta-llama/Llama-3.2-1B-Instruct \
-    --port 8000 \
-    --host 0.0.0.0
+Start the application:
+
+```bash
+streamlit run app.py
+```
+
+---
+
+## What Participants Learn
+
+By working through the modules, participants learn how to:
+
+* Build a retrieval-enhanced AI application
+* Compare model latency and quality
+* Route requests intelligently
+* Implement retry and fallback strategies
+* Instrument and observe inference behavior
+* Make evidence-based inference decisions
+
+These techniques can be applied to customer support assistants, enterprise copilots, documentation assistants, AI agents, and many other production AI systems.
+
+---
+
+## Key Takeaway
+
+The winning AI applications are not always built with the biggest model.
+
+They are often built by making better decisions about:
+
+* Context
+* Model selection
+* Reliability
+* Observability
+* Cost
+* Latency
+
+This project provides a practical framework for understanding and implementing those decisions.
