@@ -1,8 +1,4 @@
-import json
-from pathlib import Path
-
-DOCS_PATH = Path("data/docs.jsonl")
-
+from src.docs import load_docs
 
 def load_docs() -> list[dict]:
     docs = []
