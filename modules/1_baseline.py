@@ -3,6 +3,7 @@ from src.inference_client import call_model
 from src.metrics import build_trace
 from typing import Generator
 
+
 def run(question: str, stream: bool = False, simulate_failure: bool = False) -> Generator[dict, None, None]:
     messages = [
         {"role": "system", "content": "You are a helpful assistant answering questions about Akamai AI Cloud."},

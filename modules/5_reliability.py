@@ -4,6 +4,7 @@ from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
 from typing import Generator
 
+
 def run(question: str, stream: bool = False, simulate_failure: bool = False) -> Generator[dict, None, None]:
     # 1. Standard RAG data context lookup
     docs = retrieve_docs(question, top_k=3)

@@ -2,6 +2,7 @@ import json
 import httpx
 from config import LARGE_MODEL, SMALL_MODEL, BASE_URL
 
+
 def route_question(question: str) -> dict:
     """
     Analyzes user intent using a fast, low-cost LLM call.

@@ -1,5 +1,6 @@
 import time
 
+
 # A simple in-memory session store to aggregate live telemetry traces
 TRACE_HISTORY = []
 

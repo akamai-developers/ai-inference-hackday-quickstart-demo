@@ -5,6 +5,7 @@ from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
 from typing import Generator
 
+
 def run(question: str, stream: bool = False, simulate_failure: bool = False) -> Generator[dict, None, None]:
     # 1. Hand the prompt over to the routing layer to pick our target model
     route_result = route_question(question)

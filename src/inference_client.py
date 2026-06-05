@@ -4,10 +4,11 @@ import json
 from typing import Generator, Union
 from config import BASE_URL, DEFAULT_TIMEOUT_SECONDS
 
+
 def call_model(
     model: str, 
     messages: list[dict], 
-    stream: bool = False,  # 👈 Added this flag
+    stream: bool = False,
     timeout: int = DEFAULT_TIMEOUT_SECONDS
 ) -> Generator[dict, None, None]:
     
@@ -22,7 +23,7 @@ def call_model(
         "stream": stream,  # 👈 Pass the flag to Akamai Cloud
     }
 
-    # CASE A: Standard Non-Streaming (Your Original Code)
+    # CASE A: Standard Non-Streaming
     if not stream:
         with httpx.Client() as client:
             response = client.post(BASE_URL, json=payload, timeout=timeout)
@@ -41,7 +42,7 @@ def call_model(
             }
             return
 
-    # CASE B: Real-Time Streaming (The New Upgraded Infrastructure)
+    # CASE B: Real-Time Streaming
     with httpx.stream("POST", BASE_URL, json=payload, timeout=timeout) as response:
         response.raise_for_status()
         for line in response.iter_lines():

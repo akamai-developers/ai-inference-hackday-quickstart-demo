@@ -4,6 +4,7 @@ from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
 from typing import Generator
 
+
 def run(question: str, use_large_model: bool = True, stream: bool = False, simulate_failure: bool = False) -> Generator[dict, None, None]:
     # 1. Fetch relevant documentation exactly like Module 2
     docs = retrieve_docs(question, top_k=3)

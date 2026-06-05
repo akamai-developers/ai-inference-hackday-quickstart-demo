@@ -1,5 +1,6 @@
 from src.docs import load_docs
 
+
 def retrieve_docs(question: str, top_k: int = 3) -> list[dict]:
     docs = load_docs()
     question_words = set(question.lower().split())

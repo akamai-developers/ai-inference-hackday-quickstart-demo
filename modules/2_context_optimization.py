@@ -4,9 +4,8 @@ from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
 from typing import Generator  # 👈 Added for type hinting our new stream structure
 
-# 👈 Added the 'stream' boolean flag to the arguments
+
 def run(question: str, stream: bool = False, simulate_failure: bool = False) -> Generator[dict, None, None]:
-    # This remains identical to your original code
     docs = retrieve_docs(question, top_k=3)
     context = format_context(docs)
 
@@ -24,12 +23,10 @@ def run(question: str, stream: bool = False, simulate_failure: bool = False) -> 
         },
     ]
 
-    # 👈 Pass the stream flag down to our updated client
     stream_generator = call_model(LARGE_MODEL, messages, stream=stream)
 
     full_answer = ""
     
-    # 👈 Loop through the chunks as they fly in from the Akamai network
     for chunk in stream_generator:
         full_answer += chunk["token"]
         

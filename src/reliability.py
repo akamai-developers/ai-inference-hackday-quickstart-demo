@@ -3,6 +3,7 @@ from typing import Generator
 from config import SMALL_MODEL
 from src.inference_client import call_model
 
+
 def call_model_with_fallback(
     primary_model: str, 
     messages: list[dict], 

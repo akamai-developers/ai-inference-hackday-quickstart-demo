@@ -1,6 +1,7 @@
 import pandas as pd
 from src.metrics import get_all_traces
 
+
 def run_observability_analysis() -> dict:
     """
     Module 6: Aggregates historical inference metrics.
