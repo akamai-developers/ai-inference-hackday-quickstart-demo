@@ -1,18 +1,5 @@
 from src.docs import load_docs
 
-def load_docs() -> list[dict]:
-    docs = []
-
-    if not DOCS_PATH.exists():
-        return docs
-
-    with DOCS_PATH.open("r") as f:
-        for line in f:
-            docs.append(json.loads(line))
-
-    return docs
-
-
 def retrieve_docs(question: str, top_k: int = 3) -> list[dict]:
     docs = load_docs()
     question_words = set(question.lower().split())
