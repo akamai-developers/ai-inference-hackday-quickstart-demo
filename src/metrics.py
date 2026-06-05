@@ -17,6 +17,8 @@ def build_trace(
     errors=None,
 ):
     # Calculate generation throughput speed (Tokens per Second)
+    # To measure true AI speed, you must subtract the initial network lag (TTFT) from total latency 
+    # because that waiting time is not part of the actual text generation process.
     tokens_per_sec = 0.0
     if tokens_out and latency_ms and ttft_ms:
         generation_time_sec = (latency_ms - ttft_ms) / 1000.0

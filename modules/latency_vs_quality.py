@@ -1,4 +1,4 @@
-from config import LARGE_MODEL, SMALL_MODEL  # 👈 Ensure SMALL_MODEL is defined in your config
+from config import LARGE_MODEL, SMALL_MODEL
 from src.inference_client import call_model
 from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace

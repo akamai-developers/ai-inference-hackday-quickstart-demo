@@ -1,5 +1,5 @@
 from config import LARGE_MODEL
-from src.reliability import call_model_with_fallback  # 👈 Import from your central resilience script
+from src.reliability import call_model_with_fallback
 from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
 from typing import Generator

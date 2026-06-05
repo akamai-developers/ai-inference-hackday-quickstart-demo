@@ -20,14 +20,14 @@ def call_model(
         "messages": messages,
         "temperature": 0.2,
         "max_tokens": 500,
-        "stream": stream,  # 👈 Pass the flag to Akamai Cloud
+        "stream": stream, 
     }
 
     # CASE A: Standard Non-Streaming
     if not stream:
         with httpx.Client() as client:
             response = client.post(BASE_URL, json=payload, timeout=timeout)
-            response.raise_for_status()
+            response.raise_for_status() # Will raise an error for non-2xx responses, which can be caught by the reliability layer
             data = response.json()
             
             latency_ms = round((time.time() - start) * 1000, 2)
@@ -53,14 +53,21 @@ def call_model(
                     ttft_ms = round((time.time() - start) * 1000, 2)
                 
                 chunk_data = json.loads(line[6:])
-                delta = chunk_data["choices"].get("delta", {})
-                token = delta.get("content", "")
+                
+                # 👇 FIX: Add [0] here to extract the dictionary out of the choices list
+                if "choices" in chunk_data and chunk_data["choices"]:
+                    choice = chunk_data["choices"][0]
+                    delta = choice.get("delta", {})
+                    token = delta.get("content", "")
+                else:
+                    token = ""
+                    
                 usage = chunk_data.get("usage", {})
                 
                 yield {
                     "token": token,
                     "ttft_ms": ttft_ms,
                     "latency_ms": round((time.time() - start) * 1000, 2),
-                    "tokens_in": usage.get("prompt_tokens"),
-                    "tokens_out": usage.get("completion_tokens"),
+                    "tokens_in": usage.get("prompt_tokens") if usage else 0,
+                    "tokens_out": usage.get("completion_tokens") if usage else 0,
                 }

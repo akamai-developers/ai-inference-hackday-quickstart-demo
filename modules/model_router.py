@@ -1,5 +1,5 @@
 from config import LARGE_MODEL
-from src.router import route_question  # 👈 Import from your central router file
+from src.router import route_question
 from src.inference_client import call_model
 from src.retriever import retrieve_docs, format_context
 from src.metrics import build_trace
