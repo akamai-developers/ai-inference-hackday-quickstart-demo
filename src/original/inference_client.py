@@ -2,7 +2,7 @@ import time
 import httpx
 import json
 from typing import Generator, Union
-from config import BASE_URL, DEFAULT_TIMEOUT_SECONDS
+from config import LARGE_MODEL, LARGE_MODEL_URL, SMALL_MODEL_URL, DEFAULT_TIMEOUT_SECONDS
 
 
 def call_model(
@@ -15,6 +15,9 @@ def call_model(
     start = time.time()
     ttft_ms = None
 
+    # 👈 INFRASTRUCTURE ROUTING INTERCEPT: Choose target port endpoint
+    target_url = LARGE_MODEL_URL if model == LARGE_MODEL else SMALL_MODEL_URL
+
     payload = {
         "model": model,
         "messages": messages,
@@ -26,7 +29,7 @@ def call_model(
     # CASE A: Standard Non-Streaming
     if not stream:
         with httpx.Client() as client:
-            response = client.post(BASE_URL, json=payload, timeout=timeout)
+            response = client.post(target_url, json=payload, timeout=timeout)
             response.raise_for_status() # Will raise an error for non-2xx responses, which can be caught by the reliability layer
             data = response.json()
             
@@ -43,7 +46,7 @@ def call_model(
             return
 
     # CASE B: Real-Time Streaming
-    with httpx.stream("POST", BASE_URL, json=payload, timeout=timeout) as response:
+    with httpx.stream("POST", target_url, json=payload, timeout=timeout) as response:
         response.raise_for_status()
         for line in response.iter_lines():
             if not line or line == "data: [DONE]":

@@ -1,6 +1,6 @@
 import json
 import httpx
-from config import LARGE_MODEL, SMALL_MODEL, BASE_URL
+from config import LARGE_MODEL, SMALL_MODEL, LARGE_MODEL_URL, SMALL_MODEL_URL
 
 
 def route_question(question: str) -> dict:
@@ -27,7 +27,7 @@ def route_question(question: str) -> dict:
     
     try:
         with httpx.Client() as client:
-            response = client.post(BASE_URL, json=payload, timeout=5.0)
+            response = client.post(SMALL_MODEL_URL, json=payload, timeout=5.0)
             response.raise_for_status()
             data = response.json()
             

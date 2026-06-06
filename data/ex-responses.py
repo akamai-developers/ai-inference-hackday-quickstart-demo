@@ -1,5 +1,6 @@
-# Conceptual view of the httpx.Response object
-# What response = client.post(...) returns
+# CASE A: Standard Non-Streaming
+#--------------------------------
+# response = httpx.Client.post(model, payload, timeout) returns: 
 <Response [200 OK]> {
     "status_code": 200,
     "is_success": True,
@@ -15,7 +16,8 @@
 }
 
 
-# What data = response.json() looks like
+# Convert the above Response into a json dict via the .json() method
+# data = response.json() returns:
 {
     "id": "chatcmpl-9A8b7C...",
     "object": "chat.completion",
@@ -40,13 +42,15 @@
 }
 
 
+
+# CASE B: Real-Time Streaming
+#--------------------------------
+
 #The Raw Network Stream (Server-Sent Events)
+# httpx.stream(...) returns something like this: 
 data: {"id":"chat-123","choices":[{"index":0,"delta":{"role":"assistant","content":"AI "}}]}
-
 data: {"id":"chat-123","choices":[{"index":0,"delta":{"content":"is "}}]}
-
 data: {"id":"chat-123","choices":[{"index":0,"delta":{"content":"fast."}}],"usage":{"prompt_tokens":5,"completion_tokens":3}}
-
 data: [DONE]
 
 
