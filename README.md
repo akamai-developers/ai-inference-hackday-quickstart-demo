@@ -1,232 +1,67 @@
-# Ask Akamai AI Cloud
+# Enterprise AI Inference Gateway
 
-A hands-on workshop project that demonstrates how **inference decisions** can make AI applications faster, cheaper, more reliable, and more useful.
+Welcome to the **AI Inference HackDay 2026** core workshop workspace. 
 
-Rather than focusing on model training or infrastructure deployment, this project explores the engineering layer that sits between users and large language models (LLMs). Participants learn how to improve AI applications through techniques such as context optimization, model routing, reliability patterns, and observability.
+This repository functions as a fully instrumented, production-grade **AI Inference Gateway**. An Inference Gateway acts as an intelligent, defensive proxy layer sitting directly between your front-end client applications and underlying high-performance GPU infrastructure (powered by `vLLM` and `Ollama`). 
 
-The application is built as a simple documentation assistant powered by public Akamai AI Cloud documentation and a hosted inference endpoint.
-
----
-
-## Workshop Goal
-
-The purpose of this project is to teach participants how to think beyond simply calling an LLM API.
-
-By the end of the workshop, participants should understand:
-
-* When larger models are worth the latency and cost
-* How model routing improves efficiency
-* Why context optimization matters
-* How retries and fallback models improve reliability
-* What metrics should be collected to make informed inference decisions
-* How these techniques are used in real AI products
-
-The central message of the workshop is:
-
-> Don't just call an LLM. Engineer the inference path.
+Instead of treating Large Language Models like standard web APIs, this project demonstrates how to architect for the core bottlenecks of AI workloads: **Memory Capacity, Bandwidth, Latency (TTFT), and Hardware Costs.**
 
 ---
 
-## Application Overview
-
-Ask Akamai AI Cloud is a lightweight question-answering assistant that answers questions about Akamai AI Cloud using publicly available documentation.
-
-Example questions:
-
-* What is Akamai AI Cloud?
-* What are GPU Compute Instances?
-* What is the difference between LKE and a virtual machine?
-* How should I deploy a low-latency inference workload on Akamai?
-
-The application evolves throughout the workshop, with each module introducing a new inference engineering concept.
-
----
-
-## Workshop Modules
-
-### Module 1: Baseline
-
-A simple question-answering application.
-
+## 🏗️ Gateway Architecture Overview
 ```text
-Question
-   ↓
-LLM
-   ↓
-Answer
+                  [ FRONTEND USER REQUEST ]
+                              │
+                              ▼
+┌─────────────────────── AI GATEWAY ───────────────────────┐
+│                                                          │
+│  [Module 3]  👉  Semantic Cache Lookup                   │──(Hit)──► [ Return 5ms Response ]
+│                              │ (Miss)                    │
+│                              ▼                           │
+│  [Module 4]  👉  Tiered Escalation Router                │
+│                              │                           │
+│             (Conversational) │  (Complex / Bloated RAG)  │
+│                    ▼         │           ▼               │
+│             [ 1B Edge Worker ]      [ 8B vLLM Cluster ]  │
+│                                              │           │
+│  [Module 5]  👉                      Asynchronous Queue  │
+│                                              │           │
+│  [Module 5]  👉                   Structured Validation  │
+│                                              │           │
+│  [Module 5]  👉                   Streaming Telemetry    │
+│                                              │           │
+└──────────────────────────────────────────────╪───────────┘
+                                               │ (If Crash / Rate Limit)
+                                               ▼
+                                   [ Circuit Breaker Fallback ]
 ```
 
-Concepts:
 
-* Basic inference
-* Hosted model endpoint
 
----
+## 📂 Repository Structure & Workshop Flow
 
-### Module 2: Context Optimization
-
-Introduces retrieval and grounding using Akamai documentation.
+The workspace is split into core architectural machinery (`src/`) and isolated, runnable modular lessons (`modules/`). Each module acts as an interactive science experiment validating infrastructure behaviors under load.
 
 ```text
-Question
-   ↓
-Retrieve Relevant Docs
-   ↓
-LLM
-   ↓
-Answer
-```
-
-Concepts:
-
-* Retrieval-Augmented Generation (RAG)
-* Reducing unnecessary context
-* Grounded responses
-
----
-
-### Module 3: Latency vs Quality
-
-Compares responses from a smaller model and a larger model.
-
-Concepts:
-
-* Response quality
-* Latency tradeoffs
-* Cost tradeoffs
-
----
-
-### Module 4: Model Routing
-
-Routes requests to different models based on complexity.
-
-```text
-Question
-   ↓
-Router
-   ↓
- ┌───────────┬───────────┐
- │           │
-Small      Large
-Model      Model
-```
-
-Concepts:
-
-* Dynamic model selection
-* Cost optimization
-* Latency optimization
-
----
-
-### Module 5: Reliability
-
-Introduces retries and fallback models.
-
-```text
-Question
-   ↓
-Primary Model
-   ↓
-Failure?
-   ↓
-Retry
-   ↓
-Fallback Model
-```
-
-Concepts:
-
-* Resilience
-* Graceful degradation
-* Production reliability
-
----
-
-### Module 6: Observability
-
-Displays metrics and inference traces.
-
-Concepts:
-
-* Latency tracking
-* Token usage
-* Routing decisions
-* Fallback events
-* Inference transparency
-
----
-
-## Architecture
-
-```text
-User
- ↓
-Ask Akamai AI Cloud
- ↓
-Retriever
- ↓
-Router
- ↓
-Reliability Layer
- ↓
-Hosted Inference Endpoint
- ↓
-Model
-```
-
-The application demonstrates how modern AI systems often derive more value from inference architecture than from model changes alone.
-
----
-
-## Repository Structure
-
-```text
-ask-akamai-ai-cloud/
+ai-inference-hackday-quickstart-demo/
+├── README.md                
+├── requirements.txt           
+├── src/                      
+│   ├── config.py              # Centralized cluster URLs (vLLM / Ollama backends)
+│   ├── telemetry.py           # Metrics capture hooks tracking operational KPIs
+│   └── mock_data.py           # Local vector space cache & Golden Dataset prompts
 │
-├── app.py
-├── config.py
-├── requirements.txt
-│
-├── data/
-│   └── docs.jsonl
-│
-├── src/
-│   ├── inference_client.py
-│   ├── retriever.py
-│   ├── router.py
-│   ├── reliability.py
-│   └── metrics.py
-│
-├── modules/
-│   ├── baseline.py
-│   ├── context_optimization.py
-│   ├── latency_quality.py
-│   ├── model_routing.py
-│   ├── reliability_demo.py
-│   └── observability.py
-│
-└── README.md
+└── modules/                   
+    ├── part1_vram_frameworks.py     # Hardware sizing math & sequential blocking demo
+    ├── part2_paged_attention.py     # Concurrent stress test: Ollama vs. vLLM execution
+    ├── part3_token_tax_cache.py     # Prompt optimization benchmarks & Semantic Caching
+    ├── part4_tiered_routing.py      # Context-aware request classification middleware
+    ├── part5_reliability_queues.py  # Pydantic JSON enforcement, SSE streaming, & Circuit Breakers
+    └── part6_automated_evals.py     # Programmatic LLM-as-a-Judge validation pipeline
 ```
 
----
 
-## Data Sources
-
-This project uses publicly available Akamai documentation, including:
-
-* Akamai AI Cloud
-* GPU Compute Instances
-* NVIDIA RTX PRO 6000 Blackwell GPU documentation
-* Linode Kubernetes Engine (LKE)
-* Related Akamai Cloud resources
-
-Documentation is ingested into a lightweight retrieval system to support context optimization demonstrations.
-
----
-
-## Running the Application
+### How to Run Application
 
 Set environment variables:
 
@@ -237,45 +72,54 @@ export LARGE_MODEL="your-large-model"
 ```
 
 Install dependencies:
-
 ```bash
 pip install -r requirements.txt
 ```
 
-Start the application:
+## ⏱️ Interactive Playbook: How to Run the Modules
+
+Every script is fully configured to execute directly from your terminal. Run them sequentially as we advance through the presentation slides.
+
+### 🟢 Phase 1: Hardware Layer, VRAM Math, & Runtimes
+Understand your memory footprint to prevent the dreaded **3:00 AM Out-of-Memory (OOM) Crash**. Learn how Quantization yields up to a 70% VRAM saving, and see why standard synchronous web servers lock up under load.
 
 ```bash
-streamlit run app.py
+python modules/part1_vram_frameworks.py
 ```
 
----
+### 🔀 Phase 2: Packaging, Routing, & Extreme Cost Cutting
+Mitigate the Input Token Tax. Witness how massive, unoptimized RAG contexts destroy Time to First Token (TTFT) metrics. Implement an in-memory Semantic Cache to intercept repeating prompts, resulting in a 5ms response at a $0 GPU cost.
 
-## What Participants Learn
+```bash
+python modules/part3_token_tax_cache.py
+``` 
 
-By working through the modules, participants learn how to:
+Implement the gateway's brain: a Tiered Escalation Router. Automatically offload minor text generation to lightweight edge devices or 1B models, saving your premium clusters for complex logic.
 
-* Build a retrieval-enhanced AI application
-* Compare model latency and quality
-* Route requests intelligently
-* Implement retry and fallback strategies
-* Instrument and observe inference behavior
-* Make evidence-based inference decisions
+```bash
+python modules/part4_tiered_routing.py
+```
 
-These techniques can be applied to customer support assistants, enterprise copilots, documentation assistants, AI agents, and many other production AI systems.
+### 📈 Phase 3: Reliability, Observability, & Live Telemetry
+Bulletproof your application structure. Use Pydantic/Instructor to enforce rigid output schemas so your front-end never crashes over malformed JSON. Calculate live performance KPIs (TTFT and Throughput Tokens/Sec) over an active stream, and watch the Circuit Breaker automatically switch to safe fallbacks when a cluster disconnects.
 
----
+```bash
+python modules/part5_reliability_queues.py
+```
 
-## Key Takeaway
+Move past generic server logging. Implement automated LLM-as-a-Judge verification loops. Rather than checking generations manually, score your pipeline's safety and alignment programmatically against a curated dataset of Golden Prompts.
 
-The winning AI applications are not always built with the biggest model.
+```bash
+python modules/part6_automated_evals.py
+```
 
-They are often built by making better decisions about:
+## 📊 The 3 Operational AI KPIs to Watch
+When building your weekend hackathon entries, move past standard server uptime and monitor your AI Operations Suite:
 
-* Context
-* Model selection
-* Reliability
-* Observability
-* Cost
-* Latency
+- **Time to First Token (TTFT)**: Measures input processing efficiency. Use context optimization and streaming to keep this under 200ms.
 
-This project provides a practical framework for understanding and implementing those decisions.
+- **Tokens Per Second Per User**: Measures throughput speed. Maximize this via production runtime engines utilizing continuous batching.
+
+- **KV Cache Utilization**: Measures available GPU memory headroom. Protect this using a semantic cache and strict input traffic queues.
+
+Happy Hacking! Copy any module's architectural design patterns directly into your submission builds to ensure a bulletproof, high-performance project presentation.
