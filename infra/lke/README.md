@@ -1,4 +1,4 @@
-# AI Agents Workshop — Infrastructure
+# AI Inference Hackday Workshop — Infrastructure
 
 Terraform + Kubernetes infrastructure for running the workshop on Akamai Cloud (Linode).
 

@@ -14,7 +14,7 @@ spec:
   automountServiceAccountToken: false
   containers:
     - name: code-server
-      image: ghcr.io/akamai-developers/ai-agents-workspace:latest
+      image: ghcr.io/akamai-developers/ai-hackday-workspace:06-2026
       ports:
         - containerPort: 8080
           name: http

@@ -55,13 +55,11 @@ Expected: All checks green.
 
 1. Open `https://workshop.example.com/s01/` in a browser
 2. Enter the password from access-cards.csv
-3. Run all 4 workshop scripts manually:
+3. Run all workshop modules manually:
    ```
-   python workshop/00_verify.py
-   python workshop/01_first_agent.py
-   python workshop/02_add_tools.py
-   python workshop/03_add_memory.py
-   python workshop/04_heartbeat.py
+   python demo/01_bench.py
+   python demo/02_intent_router.py
+   python demp/03_resilient.py
    ```
 4. Confirm colored output, tool calls work, LLM responds
 
@@ -75,7 +73,7 @@ Expected: All checks green.
 open manifests/generated/access-cards.html
 ```
 
-DA partner distributes printed cards to students.
+DA distributes printed cards to students.
 
 ### T-5m: QR Code on Projector
 
@@ -83,7 +81,7 @@ Display the workshop URL QR code. Students start connecting.
 
 ### T+0: Workshop Begins
 
-Du'An follows the docs/ guide. Students run scripts in order.
+Sheilah follows the docs/ guide. Students run scripts in order.
 
 ### T+60m: Teardown
 

@@ -8,7 +8,7 @@ RUN apt-get update && \
 
 USER coder
 
-ARG WORKSHOP_REPO=https://github.com/akamai-developers/ai-agents-workshop.git
+ARG WORKSHOP_REPO=https://github.com/akamai-developers/ai-inference-hackday-quickstart-demo.git
 ARG WORKSHOP_REF=main
 
 # Fetch the specific ref (branch name or commit SHA) so build-image.sh can pin
@@ -24,8 +24,7 @@ RUN mkdir -p /home/coder/workshop && cd /home/coder/workshop && \
 
 RUN code-server --install-extension ms-python.python
 
-# Put the venv on PATH so terminals/processes find nba-stats-mcp and other entry points
-# without needing to source .venv/bin/activate.
+# Put the venv on PATH so terminals/processes find entry points without needing to source .venv/bin/activate.
 ENV PATH="/home/coder/workshop/.venv/bin:${PATH}"
 
 WORKDIR /home/coder/workshop

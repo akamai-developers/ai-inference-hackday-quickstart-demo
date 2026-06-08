@@ -36,17 +36,6 @@
    kubectl -n workshop rollout restart statefulset/vllm
    ```
 
-### "Tool calls fail"
-
-1. Check nba-stats-mcp is installed:
-   ```bash
-   kubectl -n workshop exec ws-XX -- .venv/bin/which nba-stats-mcp
-   ```
-2. Check internet connectivity:
-   ```bash
-   kubectl -n workshop exec ws-XX -- curl -sf https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json | head -c 100
-   ```
-
 ### "Student is stuck"
 
 Point them to the solutions folder:
@@ -91,4 +80,4 @@ python workshop/solutions/02_add_tools_done.py
 
 ### Model download slow
 
-The Qwen3.5-9B-FP8 model is ~10GB. First download takes 5-10 minutes per pod. Run `provision.sh` at T-24h to ensure models are cached.
+The Qwen3-8B-FP8 model is ~10GB. First download takes 5-10 minutes per pod. Run `provision.sh` at T-24h to ensure models are cached.

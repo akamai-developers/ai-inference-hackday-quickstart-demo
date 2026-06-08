@@ -19,7 +19,7 @@ variable "k8s_version" {
 variable "label" {
   description = "Cluster label"
   type        = string
-  default     = "ai-agents-workshop"
+  default     = "ai-hackday-workshop"
 }
 
 variable "cpu_node_type" {

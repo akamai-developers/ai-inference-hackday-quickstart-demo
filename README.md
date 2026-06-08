@@ -47,10 +47,16 @@ ai-inference-hackday-quickstart-demo/
 │       ├── terraform             
 │       ├── scripts           
 │       └── manifests          
-└── demo/                   
+└── demo/                 
     ├── 01_bench.py     
     ├── 02_router_demo.py     
-    ├── 03_resilient.py     
+    ├── 03_resilient demo/
+└──src/
+   ├── config.py     -> reads env vars
+   ├── clients.py    -> creates API clients
+   ├── inference.py  -> calls model
+   ├── router.py     -> classifies intent
+   └── resilience.py -> timing/TTFT helpers
 ```
 
 ## Initial Application Setup

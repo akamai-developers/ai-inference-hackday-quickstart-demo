@@ -48,7 +48,7 @@ echo ""
 echo "--- Test Inference ---"
 TEST_RESULT=$(kubectl -n workshop exec vllm-0 -- curl -sf http://localhost:8000/v1/chat/completions \
     -H "Content-Type: application/json" \
-    -d '{"model":"lovedheart/Qwen3.5-9B-FP8","messages":[{"role":"user","content":"Say hello"}],"max_tokens":10}' 2>/dev/null || echo "FAIL")
+    -d '{"model":"Qwen/Qwen3-8B-FP8","messages":[{"role":"user","content":"Say hello"}],"max_tokens":10}' 2>/dev/null || echo "FAIL")
 if echo "${TEST_RESULT}" | grep -q "choices"; then
     echo "  ✓ Test inference successful"
     PASS=$((PASS + 1))

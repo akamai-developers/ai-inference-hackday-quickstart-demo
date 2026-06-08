@@ -28,7 +28,7 @@ resource "linode_lke_cluster" "workshop" {
   label       = var.label
   k8s_version = var.k8s_version
   region      = var.region
-  tags        = ["workshop", "stanford", "ai-agents"]
+  tags        = ["workshop", "hackersquad", "ai-hackday"]
 
   pool {
     type  = var.cpu_node_type

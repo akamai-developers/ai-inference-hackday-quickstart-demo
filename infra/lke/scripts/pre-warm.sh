@@ -27,7 +27,7 @@ for POD in ${PODS}; do
     echo "  Warming ${POD}..."
     kubectl -n workshop exec "${POD}" -- curl -sf http://localhost:8000/v1/chat/completions \
         -H "Content-Type: application/json" \
-        -d '{"model":"lovedheart/Qwen3.5-9B-FP8","messages":[{"role":"user","content":"What is 2+2?"}],"max_tokens":20}' \
+        -d '{"model":"Qwen/Qwen3-8B-FP8","messages":[{"role":"user","content":"What is 2+2?"}],"max_tokens":20}' \
         > /dev/null 2>&1 && echo "    ✓ ${POD} warm" || echo "    ✗ ${POD} failed"
 done
 

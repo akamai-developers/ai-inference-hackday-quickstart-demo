@@ -4,7 +4,7 @@ token = "your-linode-api-token"
 
 # region        = "us-ord"
 # k8s_version   = "1.34"
-# label         = "ai-agents-workshop"
+# label         = "ai-hackday-workshop"
 
 # cpu_node_type  = "g6-dedicated-8"
 # cpu_node_count = 5

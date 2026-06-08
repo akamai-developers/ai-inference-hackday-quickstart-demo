@@ -9,9 +9,9 @@ INFRA_DIR="$(dirname "$SCRIPT_DIR")"
 CONTEXT="${INFRA_DIR}/images/workspace"
 
 REGISTRY="${REGISTRY:-ghcr.io/akamai-developers}"
-IMAGE="${IMAGE:-ai-agents-workspace}"
-TAG="${TAG:-latest}"
-WORKSHOP_REPO="${WORKSHOP_REPO:-https://github.com/akamai-developers/ai-agents-workshop.git}"
+IMAGE="${IMAGE:-ai-hackday-workspace}"
+TAG="${TAG:-06-2026}"
+WORKSHOP_REPO="${WORKSHOP_REPO:-https://github.com/akamai-developers/ai-inference-hackday-quickstart-demo.git}"
 
 # Resolve WORKSHOP_REF to a concrete commit SHA so Docker layer caching does
 # not silently bake an outdated workshop into the image. Without this, a
