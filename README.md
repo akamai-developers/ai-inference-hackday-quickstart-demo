@@ -1,10 +1,28 @@
- # 🚀 High-Throughput LLM Inference Workshop
+# 🚀 High-Throughput LLM Inference Workshop
 
-Welcome to the **AI Inference HackDay 2026** core workshop workspace. This hands-on session bypasses local setup friction to dive straight into the mechanics of production-grade AI infrastructure. 
+Welcome to the **AI Inference HackDay 2026** core workshop workspace. 
 
-Instead of waiting for models to download, you will interact directly with a pre-configured, high-performance **vLLM serving engine** hosted on an **Akamai Linode Kubernetes Engine (LKE)** cluster.
+This hands-on session bypasses local setup friction to dive straight into the mechanics of production-grade AI infrastructure. Instead of waiting for models to download or struggle with local GPU configurations, you will interact directly with a pre-configured, high-performance **vLLM serving engine** hosted on an **Akamai Linode Kubernetes Engine (LKE)** cluster.
 
 ---
+
+## 🏗️ Topology Architecture
+
+Your client environment acts as a lightweight consumption layer. The massive parameter weights and high-compute scheduling architectures are entirely abstracted into the cloud infrastructure layer:
+
+```text
+ 💻 Hacker Laptop (Client Machine)
+        │
+        │ [ Port 8000 / HTTP REST API ]
+        ▼
+ 🌐 Akamai Linode Load Balancer 
+        │
+        ▼
+ ☸️ Linode Kubernetes Engine (LKE) Cluster
+        │
+        ├── 📦 Pod 1: vLLM Engine ── 🔥 NVIDIA GPU (Meta-Llama-3-8B-Instruct)
+        └── 📦 Pod 2: vLLM Engine ── 🔥 NVIDIA GPU (Meta-Llama-3-8B-Instruct)
+```
 
 ## ⏱️ Workshop Agenda (45 Minutes)
 
@@ -18,20 +36,18 @@ Instead of waiting for models to download, you will interact directly with a pre
 
 ## 📂 Repository Structure & Workshop Flow
 
-The workspace is split into core architectural machinery (`src/`) and isolated, runnable modular lessons (`modules/`). Each module acts as an interactive science experiment validating infrastructure behaviors under load.
-
 ```text
 ai-inference-hackday-quickstart-demo/
 ├── README.md                
 ├── requirements.txt           
-├── config.py
+├── .env.example
 ├── infra/                  
 │   ├── vm/
 │   └── lke/             
-│       ├── config.py             
-│       ├── telemetry.py           
-│       └── mock_data.py           
-└── modules/                   
+│       ├── terraform             
+│       ├── scripts           
+│       └── manifests          
+└── demo/                   
     ├── 01_bench.py     
     ├── 02_router_demo.py     
     ├── 03_resilient.py     
@@ -52,7 +68,18 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
----
+
+## 🛠️ Quick Sandbox Smoke Test
+
+Before running the Python scripts, run this quick terminal smoke test to verify your laptop can successfully pierce the cluster firewall and communicate with the vLLM engine:
+
+```bash
+curl http://YOUR-SHARED-SANDBOX-IP:8000/v1/models \
+  -H "Authorization: Bearer akamai-hackathon-2026-token"
+```
+
+Expected Response: A clean JSON object listing meta-llama/Llama-3-8B-Instruct. If you receive a connection timeout, double-check your cluster endpoint IP or alert a workshop mentor.
+
 
 ## ⏱️ Interactive Playbook: How to Run the Modules
 
@@ -92,8 +119,6 @@ When building your weekend hackathon entries, move past standard server uptime a
 * **Tokens Per Second Per User:** Measures throughput speed. Maximize this via production runtime engines utilizing continuous batching.
 
 * **KV Cache Utilization:** Measures available GPU memory headroom. Protect this using a semantic cache and strict input traffic queues.
-
-> 💡 **Takeaway:** Copy any module's architectural design patterns directly into your submission builds to ensure a bulletproof, high-performance project presentation.
 
 ---
 
