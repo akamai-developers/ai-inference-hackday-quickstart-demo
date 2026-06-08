@@ -1,42 +1,20 @@
-# Enterprise AI Inference Gateway
+ # 🚀 High-Throughput LLM Inference Workshop
 
-Welcome to the **AI Inference HackDay 2026** core workshop workspace. 
+Welcome to the **AI Inference HackDay 2026** core workshop workspace. This hands-on session bypasses local setup friction to dive straight into the mechanics of production-grade AI infrastructure. 
 
-This repository functions as a fully instrumented, production-grade **AI Inference Gateway**. An Inference Gateway acts as an intelligent, defensive proxy layer sitting directly between your front-end client applications and underlying high-performance GPU infrastructure (powered by `vLLM` and `Ollama`). 
-
-Instead of treating Large Language Models like standard web APIs, this project demonstrates how to architect for the core bottlenecks of AI workloads: **Memory Capacity, Bandwidth, Latency (TTFT), and Hardware Costs.**
+Instead of waiting for models to download, you will interact directly with a pre-configured, high-performance **vLLM serving engine** hosted on an **Akamai Linode Kubernetes Engine (LKE)** cluster.
 
 ---
 
-## 🏗️ Gateway Architecture Overview
-```text
-                  [ FRONTEND USER REQUEST ]
-                              │
-                              ▼
-┌─────────────────────── AI GATEWAY ───────────────────────┐
-│                                                          │
-│  [Module 3]  👉  Semantic Cache Lookup                   │──(Hit)──► [ Return 5ms Response ]
-│                              │ (Miss)                    │
-│                              ▼                           │
-│  [Module 4]  👉  Tiered Escalation Router                │
-│                              │                           │
-│             (Conversational) │  (Complex / Bloated RAG)  │
-│                    ▼         │           ▼               │
-│             [ 1B Edge Worker ]      [ 8B vLLM Cluster ]  │
-│                                              │           │
-│  [Module 5]  👉                      Asynchronous Queue  │
-│                                              │           │
-│  [Module 5]  👉                   Structured Validation  │
-│                                              │           │
-│  [Module 5]  👉                   Streaming Telemetry    │
-│                                              │           │
-└──────────────────────────────────────────────╪───────────┘
-                                               │ (If Crash / Rate Limit)
-                                               ▼
-                                   [ Circuit Breaker Fallback ]
-```
+## ⏱️ Workshop Agenda (45 Minutes)
 
+*   **00:00 - 00:05** | Environment Check & Cluster Connectivity
+*   **00:05 - 00:15** | **Module 1:** The Infrastructure Layer (`01_bench.py`)
+*   **00:15 - 00:27** | **Module 2:** The Architectural Layer (`02_router_demo.py`)
+*   **00:27 - 00:40** | **Module 3:** The Production/Ops Layer (`03_resilient.py`)
+*   **00:40 - 00:45** | Q&A & Hackathon Project Ideation
 
+---
 
 ## 📂 Repository Structure & Workshop Flow
 
@@ -46,29 +24,27 @@ The workspace is split into core architectural machinery (`src/`) and isolated, 
 ai-inference-hackday-quickstart-demo/
 ├── README.md                
 ├── requirements.txt           
-├── src/                      
-│   ├── config.py              # Centralized cluster URLs (vLLM / Ollama backends)
-│   ├── telemetry.py           # Metrics capture hooks tracking operational KPIs
-│   └── mock_data.py           # Local vector space cache & Golden Dataset prompts
-│
+├── config.py
+├── infra/                  
+│   ├── vm/
+│   └── lke/             
+│       ├── config.py             
+│       ├── telemetry.py           
+│       └── mock_data.py           
 └── modules/                   
-    ├── part1_vram_frameworks.py     # Hardware sizing math & sequential blocking demo
-    ├── part2_paged_attention.py     # Concurrent stress test: Ollama vs. vLLM execution
-    ├── part3_token_tax_cache.py     # Prompt optimization benchmarks & Semantic Caching
-    ├── part4_tiered_routing.py      # Context-aware request classification middleware
-    ├── part5_reliability_queues.py  # Pydantic JSON enforcement, SSE streaming, & Circuit Breakers
-    └── part6_automated_evals.py     # Programmatic LLM-as-a-Judge validation pipeline
+    ├── 01_bench.py     
+    ├── 02_router_demo.py     
+    ├── 03_resilient.py     
 ```
 
+## Initial Application Setup
 
-### How to Run Application
-
-Set environment variables:
+Set environment variables in your terminal before running the modules:
 
 ```bash
 export AKAMAI_INFERENCE_URL="http://YOUR_ENDPOINT:8000/v1/chat/completions"
-export SMALL_MODEL="your-small-model"
-export LARGE_MODEL="your-large-model"
+export SMALL_MODEL="meta-llama/Llama-3-8B-Instruct"
+export LARGE_MODEL="gpt-4o-mini"
 ```
 
 Install dependencies:
@@ -76,50 +52,95 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+---
+
 ## ⏱️ Interactive Playbook: How to Run the Modules
 
 Every script is fully configured to execute directly from your terminal. Run them sequentially as we advance through the presentation slides.
 
-### 🟢 Phase 1: Hardware Layer, VRAM Math, & Runtimes
-Understand your memory footprint to prevent the dreaded **3:00 AM Out-of-Memory (OOM) Crash**. Learn how Quantization yields up to a 70% VRAM saving, and see why standard synchronous web servers lock up under load.
+### Module 1: The Raw Infrastructure Benchmark (`01_bench.py`)
+* **Core Concepts:** Time-to-First-Token (TTFT), Continuous Batching, PagedAttention, VRAM overhead.
+* **What it does:** Simulates 4 concurrent hacker requests hitting the shared Akamai LKE cluster simultaneously. It captures token streaming to isolate exactly how vLLM optimizes throughput at the iteration level rather than making requests queue up sequentially.
 
 ```bash
-python modules/part1_vram_frameworks.py
+python modules/01_bench.py
 ```
 
-### 🔀 Phase 2: Packaging, Routing, & Extreme Cost Cutting
-Mitigate the Input Token Tax. Witness how massive, unoptimized RAG contexts destroy Time to First Token (TTFT) metrics. Implement an in-memory Semantic Cache to intercept repeating prompts, resulting in a 5ms response at a $0 GPU cost.
+### Module 2: The Intent Router (`02_router_demo.py`)
+* **Core Concepts:** Deployment Trade-offs (Latency vs. Cost vs. Quality), LLM-based Routing Systems.
+* **What it does:** Demonstrates how to build a dynamic routing layer. Simple tasks (like password resets) are processed instantly and for free on the local Akamai Llama-3-8B cluster. Complex tasks (like code stack traces) are automatically escalated to a larger, premium reasoning engine.
 
 ```bash
-python modules/part3_token_tax_cache.py
-``` 
-
-Implement the gateway's brain: a Tiered Escalation Router. Automatically offload minor text generation to lightweight edge devices or 1B models, saving your premium clusters for complex logic.
-
-```bash
-python modules/part4_tiered_routing.py
+python modules/02_router_demo.py
 ```
 
-### 📈 Phase 3: Reliability, Observability, & Live Telemetry
-Bulletproof your application structure. Use Pydantic/Instructor to enforce rigid output schemas so your front-end never crashes over malformed JSON. Calculate live performance KPIs (TTFT and Throughput Tokens/Sec) over an active stream, and watch the Circuit Breaker automatically switch to safe fallbacks when a cluster disconnects.
+### Module 3: The Resilient Engine (`03_resilient.py`)
+* **Core Concepts:** Circuit Breakers, Graceful Degradation, LLM-as-a-Judge Evaluations.
+* **What it does:** Implements production-grade reliability guards. You will intentionally break the connection to the primary cluster live during the workshop to watch the application instantly failover to a backup cloud provider. It then triggers a lightweight background evaluation to grade the quality of the response.
 
 ```bash
-python modules/part5_reliability_queues.py
+python modules/03_resilient.py
 ```
 
-Move past generic server logging. Implement automated LLM-as-a-Judge verification loops. Rather than checking generations manually, score your pipeline's safety and alignment programmatically against a curated dataset of Golden Prompts.
-
-```bash
-python modules/part6_automated_evals.py
-```
+---
 
 ## 📊 The 3 Operational AI KPIs to Watch
 When building your weekend hackathon entries, move past standard server uptime and monitor your AI Operations Suite:
 
-- **Time to First Token (TTFT)**: Measures input processing efficiency. Use context optimization and streaming to keep this under 200ms.
+* **Time to First Token (TTFT):** Measures input processing efficiency. Use context optimization and streaming to keep this under 200ms.
 
-- **Tokens Per Second Per User**: Measures throughput speed. Maximize this via production runtime engines utilizing continuous batching.
+* **Tokens Per Second Per User:** Measures throughput speed. Maximize this via production runtime engines utilizing continuous batching.
 
-- **KV Cache Utilization**: Measures available GPU memory headroom. Protect this using a semantic cache and strict input traffic queues.
+* **KV Cache Utilization:** Measures available GPU memory headroom. Protect this using a semantic cache and strict input traffic queues.
 
-Happy Hacking! Copy any module's architectural design patterns directly into your submission builds to ensure a bulletproof, high-performance project presentation.
+> 💡 **Takeaway:** Copy any module's architectural design patterns directly into your submission builds to ensure a bulletproof, high-performance project presentation.
+
+---
+
+## 📊 Core Concepts Cheat Sheet
+
+### 1. The VRAM Formula (The Hard Constraint)
+Your AI model must fit entirely inside your GPU's video memory (VRAM). Use this formula to calculate your base storage requirements before provisioning hardware:
+
+$$\text{Model Weights Size (GB)} \approx \frac{\text{Parameter Count (in Billions)} \times \text{Precision (in bits)}}{8}$$
+
+* **The 25% Rule:** Always add 20-30% extra VRAM headroom on top of your model weight size to accommodate system software overhead and the KV Cache (conversation history).
+
+### 2. Akamai GPU Virtual Machine Matrix
+Use your **\$300 hackathon credits** to spin up one of these dedicated compute options within your private account dashboard:
+
+| Akamai VM Selection | VRAM Size | Hourly Cost | Ideal Hackathon Workload Target |
+| :--- | :--- | :--- | :--- |
+| **RTX 4000 Ada (Small)** | 16 GB | \$0.52 / hr | 7B or 14B open-source models running at a 4-bit quantization level. |
+| **NVIDIA Quadro RTX 6000** | 24 GB | \$1.50 / hr | Unquantized 7B models at full FP16 precision or heavy embedding tasks. |
+| **RTX 4000 Ada (Large)** | 64 GB | \$0.96 / hr | Large context window applications, multi-agent frameworks, batched vision tasks. |
+| **RTX PRO 6000 Blackwell** | 96 GB | \$2.50 / hr | 70B scale models or specialized custom fine-tuning tasks. |
+
+> ⚠️ **Cost Optimization Pro-Tip:** High-performance GPUs consume your credit pool continuously while active. Remember to completely **destroy/delete** your active instances if you take an extended break or finish hacking for the night to protect your remaining balance.
+
+---
+
+## 🛠️ Essential Cloud Terminal Troubleshooting Commands
+
+When managing your private Akamai Linux server compute workspace via SSH, keep these three foundational diagnostic utilities documented:
+
+1. **Inspect Real-Time VRAM Space Allocations:**
+```bash
+   nvidia-smi
+   ```
+*Instantly reveals how much total hardware memory your model weights consume, alongside active system execution processes.*
+
+2. **Continuously Monitor Active Memory Changes:**
+```bash
+   watch -n 1 nvidia-smi
+   ```
+   *Refreshes your hardware console metrics every single second, allowing you to watch context memory capacity adapt as complex user data streams in.*
+
+3. **Force-Purge Stalled Memory Processes:**
+```bash
+   sudo killall python3
+   ```
+   *If your software system throws an unhandled Out-of-Memory (OOM) exception freeze, running this instantly clears stuck application frameworks without forcing a complete system restart.*
+
+---
+**Happy Hacking!** 🚀

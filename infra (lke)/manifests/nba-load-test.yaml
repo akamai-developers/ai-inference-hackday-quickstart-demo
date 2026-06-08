@@ -1,0 +1,128 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nba-load-test
+  namespace: workshop
+  labels:
+    app: load-test
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: load-test
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: bench
+          # Reuse workshop image — already has Strands + nba-stats-mcp + venv.
+          image: ghcr.io/akamai-developers/ai-agents-workspace:latest
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              cd /home/coder/workshop
+              cat > /tmp/nba_real_bench.py <<'PYEOF'
+              # Realistic workshop load test:
+              # - Uses the actual nba-stats-mcp server for tool definitions (21 tools, ~8K tokens)
+              # - Runs full agent loop: model → tool call → MCP exec → model → final answer
+              # - N concurrent sessions via thread pool (Strands SDK is sync)
+              import os, time, statistics, threading, json, sys
+              from concurrent.futures import ThreadPoolExecutor, as_completed
+              from mcp import StdioServerParameters, stdio_client
+              from strands import Agent
+              from strands.tools.mcp import MCPClient
+
+              sys.path.insert(0, "/home/coder/workshop")
+              from src.config import get_model
+
+              N_CONCURRENT = int(os.environ.get("CONCURRENCY", "20"))
+              N_TOTAL      = int(os.environ.get("TOTAL", "40"))
+
+              PROMPTS = [
+                  "What's tonight's NBA scoreboard?",
+                  "How are the Nuggets doing this season?",
+                  "Get me Nikola Jokic's stats",
+                  "Who's leading the Western Conference?",
+                  "What's the Lakers' record?",
+                  "How did the Celtics do last game?",
+                  "Compare Jokic and Embiid",
+                  "Eastern Conference standings please",
+              ]
+              SYSTEM = "You are a helpful NBA analyst. Use your tools to look up real-time data. Use resolve_team_id and resolve_player_id when needed. /no_think"
+
+              # ── one shared MCP client (each session gets its own Agent though) ──
+              # Real workshop: each student has their own MCPClient. We share here to
+              # avoid 20+ subprocess startups blowing up the load-test container, but
+              # the actual inference path through vLLM is identical.
+              mcp = MCPClient(lambda: stdio_client(StdioServerParameters(command="nba-stats-mcp", args=[])))
+
+              results_lock = threading.Lock()
+              results = []
+
+              def session(idx, tools):
+                  prompt = PROMPTS[idx % len(PROMPTS)]
+                  t0 = time.perf_counter()
+                  try:
+                      agent = Agent(model=get_model(), tools=tools, system_prompt=SYSTEM)
+                      resp = agent(prompt)
+                      total = time.perf_counter() - t0
+                      with results_lock:
+                          results.append({"ok": True, "total": total, "idx": idx, "prompt": prompt[:30]})
+                  except Exception as e:
+                      total = time.perf_counter() - t0
+                      with results_lock:
+                          results.append({"ok": False, "err": str(e)[:120], "total": total, "idx": idx})
+
+              with mcp:
+                  print("=== Loading tool catalog from nba-stats-mcp ===", flush=True)
+                  tools = mcp.list_tools_sync()
+                  print(f"Loaded {len(tools)} tools", flush=True)
+
+                  print(f"\n=== Running {N_TOTAL} sessions @ {N_CONCURRENT} concurrent ===", flush=True)
+                  wall0 = time.perf_counter()
+                  with ThreadPoolExecutor(max_workers=N_CONCURRENT) as pool:
+                      futs = [pool.submit(session, i, tools) for i in range(N_TOTAL)]
+                      done = 0
+                      for f in as_completed(futs):
+                          done += 1
+                          if done % 5 == 0 or done == N_TOTAL:
+                              print(f"  [{done}/{N_TOTAL}] elapsed={time.perf_counter()-wall0:.1f}s", flush=True)
+                  wall = time.perf_counter() - wall0
+
+                  ok = [r for r in results if r["ok"]]
+                  fail = [r for r in results if not r["ok"]]
+                  totals = sorted([r["total"] for r in ok])
+
+                  def p(arr, q):
+                      return arr[int(len(arr)*q)] if arr else float("nan")
+
+                  print(f"\n=== Results ===")
+                  print(f"Wall time:           {wall:.2f}s")
+                  print(f"Successful:          {len(ok)}/{N_TOTAL}")
+                  print(f"Failed:              {len(fail)}")
+                  if fail:
+                      seen = {}
+                      for r in fail:
+                          seen[r['err']] = seen.get(r['err'], 0) + 1
+                      for err, n in seen.items():
+                          print(f"  ({n}x) {err}")
+                  if ok:
+                      print(f"Throughput:          {len(ok)/wall:.2f} sessions/sec")
+                      print(f"\nEnd-to-end latency per session (s):")
+                      print(f"  median  {p(totals,0.5):.2f}    p90 {p(totals,0.9):.2f}    p99 {p(totals,0.99):.2f}    max {totals[-1]:.2f}")
+              PYEOF
+              .venv/bin/python /tmp/nba_real_bench.py
+          env:
+            - name: VLLM_HOST
+              value: "http://vllm:8000/v1"
+            - name: MODEL_NAME
+              value: "Qwen/Qwen3-8B-FP8"
+            - name: CONCURRENCY
+              value: "80"
+            - name: TOTAL
+              value: "80"
+          resources:
+            requests: { cpu: "1",   memory: "2Gi" }
+            limits:   { cpu: "4",   memory: "4Gi" }
