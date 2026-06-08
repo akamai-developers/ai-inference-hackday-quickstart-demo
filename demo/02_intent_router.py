@@ -2,10 +2,9 @@ import time
 import os
 from openai import OpenAI
 
-# Module 2: The Intent Router
-# Concepts Supported: Deployment Trade-offs (Latency vs. Cost vs. Quality) and Model Routing.
-# The Demo: Shows your application automatically identifying simple incoming emails vs. heavy analytical data payloads, 
-#           routing them to either the fast local Akamai 8B instance or an external reasoning API.
+# Module 2: The Intent Router.
+# Shows your application automatically identifying simple incoming emails vs. heavy analytical data payloads, 
+# routing them to either the fast local Akamai 8B instance or an external reasoning API.
 
 
 LKE_URL = os.environ.get("AKAMAI_INFERENCE_URL", "http://YOUR-SHARED-SANDBOX-IP:8000/v1")
@@ -55,6 +54,7 @@ def process_support_ticket(ticket_text: str):
         )
         
     print(f"✅ Processed in {time.time() - t1:.2f}s -> Reply: {res.choices[0].message.content[:80]}...")
+
 
 if __name__ == "__main__":
     process_support_ticket("Hi, I forgot my account password. Can you send a reset link?")

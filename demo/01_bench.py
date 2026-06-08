@@ -4,10 +4,9 @@ import concurrent.futures
 from openai import OpenAI
 
 # Module 1: The Raw Infrastructure Benchmark
-# Concepts Supported: 
-#       Hardware & Model Serving Layers, VRAM overhead, PagedAttention, Continuous Batching, and Time-to-First-Token (TTFT) metrics.
-# The Demo: Showcases how the shared Akamai LKE cluster handles multiple simultaneous hacker requests compared to sequential processing.
+# Showcases how the shared Akamai LKE cluster handles multiple simultaneous hacker requests compared to sequential processing.
 
+load_dotenv()
 
 # Connecting directly to the pre-configured Akamai LKE Sandbox
 LKE_URL = os.environ.get("AKAMAI_INFERENCE_URL", "http://YOUR-SHARED-SANDBOX-IP:8000/v1")

@@ -2,10 +2,9 @@ import time
 import os
 from openai import OpenAI
 
-# Module 3: The Resilient Engine (03_resilient.py)
-#   Concepts Supported: Observability, Evaluations (Judge-Proofing), Reliability & Fallbacks (Graceful Degradation).
-#   The Demo: Integrates all concepts. You will run it once to show a perfect run with metrics, then you will change 
-#             the port to a bad IP live on screen to prove that the fallback circuit breaker saves the app from crashing.
+# Module 3: The Resilient Engine
+# Integrates all concepts. You will run it once to show a perfect run with metrics, then you will change 
+# the port to a bad IP live on screen to prove that the fallback circuit breaker saves the app from crashing.
 
 # INTENTIONAL FIX/BREAK TARGET FOR LIVE DEMO:
 # Change port '8000' to '9999' live on stage to simulate a cluster crash!
@@ -54,6 +53,7 @@ def execute_judge_proof_inference(prompt: str):
     )
     print(f"📋 [Evaluation Metric] Meets professional standards: {eval_res.choices.message.content.strip()}")
     return output
+
 
 if __name__ == "__main__":
     execute_judge_proof_inference("Generate a friendly welcome message for our platform.")
