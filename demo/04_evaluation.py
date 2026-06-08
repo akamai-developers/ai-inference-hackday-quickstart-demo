@@ -1,6 +1,6 @@
 from src.resilience import resilient_call
 from src.inference import call_model
-from src.clients import premium
+from src.clients import premium_client
 from src.config import PREMIUM_MODEL
 
 
@@ -15,7 +15,7 @@ def evaluate_response(output: str):
 
     eval_res = call_model(
         prompt=eval_prompt,
-        client=premium,
+        client=premium_client,
         model=PREMIUM_MODEL,
         max_tokens=5,
     )

@@ -28,6 +28,13 @@ spec:
           value: "http://vllm:8000/v1"
         - name: MODEL_NAME
           value: "Qwen/Qwen3-8B-FP8"
+        - name: PREMIUM_MODEL
+          value: "gpt-4o-mini"
+        - name: PREMIUM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: premium-api-secrets
+              key: PREMIUM_API_KEY
       resources:
         requests:
           cpu: "250m"

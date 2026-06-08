@@ -6,7 +6,6 @@ client= OpenAI(
     api_key="dummy"
 )
 
-premium = OpenAI(
-    base_url=PREMIUM_HOST,
-    api_key="dummy"
+premium_client = OpenAI(
+    api_key=PREMIUM_API_KEY
 )

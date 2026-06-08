@@ -1,6 +1,6 @@
 import time
 
-from src.clients import client, premium
+from src.clients import client, premium_client
 from src.config import MODEL_NAME, PREMIUM_MODEL
 from src.inference import call_model
 from src.routing import classify
@@ -8,15 +8,13 @@ from src.routing import classify
 
 # Shows your application automatically identifying simple incoming emails vs. heavy analytical data payloads, 
 # routing them to either the fast local Akamai 8B instance or an external reasoning API.
-def process_input(text: str):
+def process_support_ticket(text: str):
     print(f"\n📥 [New Ticket]: {text[:60]}...")
 
-    # 1. ROUTING LAYER
     t0 = time.time()
     intent = classify(text)
     print(f"🎯 [Router Decision]: {intent} (Took {time.time() - t0:.2f}s)")
 
-    # 2. EXECUTION LAYER
     t1 = time.time()
 
     if "FAST_TRACK" in intent:
@@ -27,12 +25,11 @@ def process_input(text: str):
             model=MODEL_NAME,
             max_tokens=80,
         )
-
     else:
         print(f"🧠 Escalating to premium/alt model ({PREMIUM_MODEL})...")
         res = call_model(
             prompt=text,
-            client=premium,
+            client=premium_client,
             model=PREMIUM_MODEL,
             max_tokens=150,
         )
@@ -43,6 +40,8 @@ def process_input(text: str):
         f"✅ Processed in {time.time() - t1:.2f}s "
         f"-> Reply: {reply[:80]}..."
     )
+
+    return reply
 
 
 if __name__ == "__main__":

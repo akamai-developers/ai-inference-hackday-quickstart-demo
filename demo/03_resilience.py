@@ -8,7 +8,6 @@ from src.inference import call_model
 # You will run it once to show a perfect run with metrics, then 
 # INTENTIONAL FIX/BREAK TARGET FOR LIVE DEMO:
 # Change port '8000' to '9999' live on stage to simulate a cluster crash!
-
 def resilient_call(prompt: str, timeout: float = 3.0):
     print("\n🚀 [Processing Request] Calling Primary Engine...")
 
@@ -72,12 +71,6 @@ if __name__ == "__main__":
     result = resilient_call(
         "Generate a friendly welcome message for our platform."
     )
-
-    if result["fallback_used"]:
-        print(f"🚨 Primary failed: {result['error']}")
-        print("🛡️ Fallback model handled the request.")
-    else:
-        print("✅ Primary Akamai vLLM handled the request.")
 
     print(f"🧭 Served by: {result['source']}")
     print(f"⏱️ Latency: {result['latency']:.2f}s")
