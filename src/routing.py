@@ -3,41 +3,48 @@ from src.config import BASE_MODEL
 from src.inference import call_model
 
 
-def router(request: str):
-    prompt = f"""
-You are a routing classifier.
+def clean_route(text: str) -> str:
+    text = (text or "").replace("<think>", "").replace("</think>", "").upper()
 
-Classify the request into one category.
+    if "PREMIUM" in text:
+        return "PREMIUM"
 
-FAST_TRACK:
-- simple summaries
-- greetings
-- rewrites
-- straightforward factual questions
+    return "BASE"
 
-COMPLEX_ANALYSIS:
+
+def router(request: str) -> str:
+    router_prompt = f"""
+You are a request router.
+
+Choose which model should handle the user request.
+
+BASE = simple tasks like:
+- summarization
+- definitions
+- short explanations
+- classification
+- extraction
+
+PREMIUM = complex tasks like:
 - debugging
-- architecture analysis
 - multi-step reasoning
-- performance issues
-- system design tradeoffs
-- data analysis
+- architecture analysis
+- incident/outage analysis
+- security/legal/financial analysis
+- complex coding
 
-IMPORTANT:
-Output ONLY one label.
-Do not explain.
-Do not think aloud.
-Do not output any other text.
-
-Request:
+User request:
 {request}
+
+Return only one word: BASE or PREMIUM.
 """
+
     result = call_model(
-        prompt=prompt,
+        prompt=router_prompt,
         client=client,
         model=BASE_MODEL,
         max_tokens=10,
         temperature=0,
     )
 
-    return result.choices[0].message.content.strip()
+    return clean_route(result.choices[0].message.content)

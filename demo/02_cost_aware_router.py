@@ -3,30 +3,28 @@ import time
 from src.client import client
 from src.config import BASE_MODEL, PREMIUM_MODEL
 from src.inference import call_model
-from src.routing import router 
+from src.routing import router
 
 
 def route_and_infer(user_request: str):
-    print(f"\n [User Request]: {user_request[:80]}...")
+    print(f"\n[User Request]: {user_request[:100]}...")
 
-    # Step 1: Use the cheap/base model to classify the request
     t0 = time.time()
     route = router(user_request)
 
-    print(f"[Router]: {route} (Took {time.time() - t0:.2f}s)")
+    print(f"[Router Decision]: {route} (Took {time.time() - t0:.2f}s)")
 
-    # Step 2: Route to the right model
-    t1 = time.time()
-
-    if "FAST_TRACK" in route:
+    if route == "BASE":
         selected_model = BASE_MODEL
         max_tokens = 80
-
     else:
         selected_model = PREMIUM_MODEL
         max_tokens = 180
 
-    # Step 3: Run the actual inference
+    print(f"[Selected Model]: {selected_model}")
+
+    t1 = time.time()
+
     result = call_model(
         prompt=user_request,
         client=client,
@@ -35,12 +33,12 @@ def route_and_infer(user_request: str):
         temperature=0,
     )
 
-    reply = result.choices[0].message.content
+    reply = result.choices[0].message.content or "[EMPTY RESPONSE]"
 
     print(
         f"✅ Completed with {selected_model} "
         f"in {time.time() - t1:.2f}s "
-        f"-> Reply: {reply[:100]}..."
+        f"-> Reply: {reply[:120]}..."
     )
 
     return reply
@@ -52,5 +50,5 @@ if __name__ == "__main__":
     )
 
     route_and_infer(
-        "Analyze a distributed system outage.."
+        "Analyze this distributed system outage: requests are timing out across three services, database CPU is high, and retries are causing cascading failures. Identify likely root causes and mitigation steps."
     )

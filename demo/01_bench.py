@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print(f" Throughput: {requests_per_sec:.2f} requests/sec")
 
     print(
-        "\n💡 Takeaway: One request is easy. "
+        "\n💡 Takeaway: Handling one request at a time is easy. "
         "The real test is what happens when multiple users hit your AI app at the same time. "
         "This is where inference engines like vLLM become valuable: they are designed to serve concurrent traffic efficiently."
     )

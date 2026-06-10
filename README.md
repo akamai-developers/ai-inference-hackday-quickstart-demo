@@ -252,25 +252,6 @@ Examples:
 
 ---
 
-# 🎯 Key Takeaways
-
-By the end of this workshop, you will have built systems that demonstrate:
-
-### Efficient Serving
-
-Using vLLM to maximize throughput and GPU utilization.
-
-### Intelligent Routing
-
-Choosing the cheapest model that can successfully complete the task.
-
-### Automated Evaluation
-
-Using AI models to assess the quality of AI-generated outputs.
-
----
-
-
 # ☁️ Next Steps: Run It Yourself on Akamai Cloud
 
 This repo includes ready-to-use Terraform templates in the `infra/` directory that can provision a GPU-powered Linode VM with NVIDIA drivers and CUDA pre-installed.
