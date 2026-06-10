@@ -12,20 +12,6 @@ Instead of downloading models locally or configuring GPUs, you'll interact with 
 
 ---
 
-## ☁️ Running Your Own AI Infrastructure
-
-The workshop environment is pre-configured and hosted on Akamai Cloud to help participants get started quickly.
-
-If you'd like to continue experimenting after the workshop, you can create your own Akamai Cloud account and deploy GPU-powered workloads, Kubernetes clusters, and AI inference services.
-
-Sign up for Akamai Cloud here:
-
-[Insert signup link]
-
-Throughout this workshop, you'll be interacting with services running on Akamai Cloud infrastructure, including Kubernetes, GPU-enabled compute, and vLLM-based model serving.
-
----
-
 # 🏗️ Architecture Overview
 
 ```text
@@ -305,23 +291,28 @@ The goal is not to always use the biggest model.
 The goal is to use the right model, at the right time, for the right task.
 
 
-## ☁️ Continue Building on Akamai Cloud
+## ☁️ Next Steps: Run It Yourself on Akamai Cloud
 
-Want to keep experimenting after the workshop?
+Want to continue building after the workshop?
 
-This repository includes ready-to-use Terraform templates under the `infra/` directory.
+This repository includes ready-to-use Terraform templates in the `infra/` directory that can provision a GPU-powered Linode VM with NVIDIA drivers and CUDA pre-installed.
 
-1. Create an Akamai Cloud account.
-2. Copy and update `terraform.tfvars.example` with your own settings.
-3. Run Terraform to provision a GPU instance.
-4. SSH into the machine and start building.
+1. Create an [Akamai Cloud account (includes $300 credits)](http://login.linode.com/signup?promo=akm-dev-git-300-31126-M055)
+2. Generate an API token.
+3. Copy and update `terraform.tfvars.example` with your own configuration.
+4. Run Terraform to provision the GPU instance.
+5. SSH into the machine and run vllm server.
 
-The templates automate much of the setup, including NVIDIA drivers and CUDA installation, so you can get a GPU-backed environment up and running quickly.
 
-You can choose whichever GPU best fits your workload, from lightweight inference deployments to larger model-serving environments.
+**NOTE: Choose the GPU that best fits your workload, from lightweight inference deployments to larger model-serving environments:
 
-👉 Sign up for Akamai Cloud: [INSERT LINK]
+| Akamai VM Selection | VRAM Size | Hourly Cost | Ideal Hackathon Workload Target |
+| :--- | :--- | :--- | :--- |
+| **RTX 4000 Ada (Small)** | 16 GB | \$0.52 / hr | 7B or 14B open-source models running at a 4-bit quantization level. |
+| **NVIDIA Quadro RTX 6000** | 24 GB | \$1.50 / hr | Unquantized 7B models at full FP16 precision or heavy embedding tasks. |
+| **RTX 4000 Ada (Large)** | 64 GB | \$0.96 / hr | Large context window applications, multi-agent frameworks, batched vision tasks. |
+| **RTX PRO 6000 Blackwell** | 96 GB | \$2.50 / hr | 70B scale models or specialized custom fine-tuning tasks. |
 
----
+> ⚠️ **Cost Optimization Pro-Tip:** High-performance GPUs consume your credit pool continuously while active. Remember to completely **destroy/delete** your active instances if you take an extended break or finish hacking for the night to protect your remaining balance.
 
 **Happy Hacking! 🚀**
