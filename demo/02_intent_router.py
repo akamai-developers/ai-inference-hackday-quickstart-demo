@@ -1,13 +1,11 @@
 import time
 
-from src.clients import client, premium_client
+from src.clients import client
 from src.config import MODEL_NAME, PREMIUM_MODEL
 from src.inference import call_model
 from src.routing import classify
 
 
-# Shows your application automatically identifying simple incoming emails vs. heavy analytical data payloads, 
-# routing them to either the fast local Akamai 8B instance or an external reasoning API.
 def process_support_ticket(text: str):
     print(f"\n📥 [New Ticket]: {text[:60]}...")
 
@@ -18,7 +16,7 @@ def process_support_ticket(text: str):
     t1 = time.time()
 
     if "FAST_TRACK" in intent:
-        print(f"⚡ Processing locally on Akamai vLLM ({MODEL_NAME})...")
+        print(f"⚡ Processing on base model ({MODEL_NAME})...")
         res = call_model(
             prompt=text,
             client=client,
@@ -26,10 +24,10 @@ def process_support_ticket(text: str):
             max_tokens=80,
         )
     else:
-        print(f"🧠 Escalating to premium/alt model ({PREMIUM_MODEL})...")
+        print(f"🧠 Escalating to bigger model ({PREMIUM_MODEL})...")
         res = call_model(
             prompt=text,
-            client=premium_client,
+            client=client,
             model=PREMIUM_MODEL,
             max_tokens=150,
         )

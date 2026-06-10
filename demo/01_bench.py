@@ -3,7 +3,7 @@ import concurrent.futures
 
 from src.inference import call_model
 from src.clients import client
-from src.config import MODEL_NAME
+from src.config import MODEL_NAME, PREMIUM_MODEL
 
 
 def benchmark_request(prompt: str, req_id: int):
@@ -14,7 +14,7 @@ def benchmark_request(prompt: str, req_id: int):
     stream = call_model(
         prompt=prompt,
         client=client,
-        model=MODEL_NAME,
+        model=PREMIUM_MODEL,
         max_tokens=100,
         stream=True,
     )

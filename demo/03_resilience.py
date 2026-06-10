@@ -1,6 +1,6 @@
 import time
 
-from src.clients import client, premium_client
+from src.clients import client
 from src.config import MODEL_NAME, PREMIUM_MODEL
 from src.inference import call_model
 
@@ -43,7 +43,7 @@ def resilient_call(prompt: str, timeout: float = 3.0):
 
         response = call_model(
             prompt=prompt,
-            client=premium_client,
+            client=client,
             model=PREMIUM_MODEL,
             max_tokens=100,
         )
