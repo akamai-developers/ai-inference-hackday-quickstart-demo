@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is gitignored.
+
+region = "us-sea"
+instance_type = "g2-gpu-rtx4000a4-s"
+project_name = "ai-hackday-demo"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"

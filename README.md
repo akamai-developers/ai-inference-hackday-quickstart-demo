@@ -63,7 +63,7 @@ pip install -r requirements.txt
 ```
 ---
 
-# 🛠️ Connectivity Smoke Test
+## 🛠️ Connectivity Smoke Test
 
 Verify connectivity to the inference endpoint:
 
@@ -221,7 +221,7 @@ python -m demo.03_evaluation
 
 ---
 
-# 📊 Key AI System Metrics
+# 📊 Key Metrics
 
 ## 1. Time to First Token (TTFT)
 
@@ -270,32 +270,10 @@ Using AI models to assess the quality of AI-generated outputs.
 
 ---
 
-# 🚀 Final Message
 
-Production AI engineering is not just about generating responses.
+# ☁️ Next Steps: Run It Yourself on Akamai Cloud
 
-It is about balancing:
-
-```text
-Latency
-+
-Cost
-+
-Quality
-```
-
-while serving real users at scale.
-
-The goal is not to always use the biggest model.
-
-The goal is to use the right model, at the right time, for the right task.
-
-
-## ☁️ Next Steps: Run It Yourself on Akamai Cloud
-
-Want to continue building after the workshop?
-
-This repository includes ready-to-use Terraform templates in the `infra/` directory that can provision a GPU-powered Linode VM with NVIDIA drivers and CUDA pre-installed.
+This repo includes ready-to-use Terraform templates in the `infra/` directory that can provision a GPU-powered Linode VM with NVIDIA drivers and CUDA pre-installed.
 
 1. Create an [Akamai Cloud account (includes $300 credits)](http://login.linode.com/signup?promo=akm-dev-git-300-31126-M055)
 2. Generate an API token.
@@ -304,7 +282,7 @@ This repository includes ready-to-use Terraform templates in the `infra/` direct
 5. SSH into the machine and run vllm server.
 
 
-**NOTE: Choose the GPU that best fits your workload, from lightweight inference deployments to larger model-serving environments:
+**NOTE:** Choose the GPU that best fits your workload, from lightweight inference deployments to larger model-serving environments.
 
 | Akamai VM Selection | VRAM Size | Hourly Cost | Ideal Hackathon Workload Target |
 | :--- | :--- | :--- | :--- |
@@ -312,6 +290,7 @@ This repository includes ready-to-use Terraform templates in the `infra/` direct
 | **NVIDIA Quadro RTX 6000** | 24 GB | \$1.50 / hr | Unquantized 7B models at full FP16 precision or heavy embedding tasks. |
 | **RTX 4000 Ada (Large)** | 64 GB | \$0.96 / hr | Large context window applications, multi-agent frameworks, batched vision tasks. |
 | **RTX PRO 6000 Blackwell** | 96 GB | \$2.50 / hr | 70B scale models or specialized custom fine-tuning tasks. |
+
 
 > ⚠️ **Cost Optimization Pro-Tip:** High-performance GPUs consume your credit pool continuously while active. Remember to completely **destroy/delete** your active instances if you take an extended break or finish hacking for the night to protect your remaining balance.
 
