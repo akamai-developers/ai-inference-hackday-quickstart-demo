@@ -1,4 +1,4 @@
-# 🚀 High-Throughput AI Systems Workshop
+# 🚀 AI Inference Optimization: A Decision Framework Workshop 
 
 Welcome to the **AI Inference HackDay 2026** workshop.
 
