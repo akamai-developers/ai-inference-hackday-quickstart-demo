@@ -65,7 +65,7 @@ Set environment variables in your terminal before running the modules:
 
 ```bash
 export AKAMAI_INFERENCE_URL="http://YOUR_ENDPOINT:8000/v1/chat/completions"
-export SMALL_MODEL="meta-llama/Llama-3-8B-Instruct"
+export BASE_MODEL="meta-llama/Llama-3-8B-Instruct"
 export LARGE_MODEL="gpt-4o-mini"
 ```
 
